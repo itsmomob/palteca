@@ -912,4 +912,277 @@
             });
 
             // Indirect speech markers
-            const indirectMarkers = ['다고', '
+            const indirectMarkers = ['다고', '라고', '냐고', '으라고', '자고'];
+            indirectMarkers.forEach(m => {
+                colored = colored.replace(new RegExp(m, 'g'), `<span class="color-indirect">${m}</span>`);
+            });
+
+            return colored;
+        }
+
+        // ============================================================
+        // RENDER
+        // ============================================================
+        function renderQuestion() {
+            const sentence = getCurrentSentence();
+            const grammar = SENTENCE_DATA[state.currentGrammar];
+
+            els.grammarTag.textContent = grammar.label;
+            els.englishPrompt.textContent = sentence.en;
+
+            // Mode-specific
+            if (state.currentMode === 'keyword') {
+                els.modeLabel.textContent = '🔑 Keyword Extractor';
+                els.keywordHint.style.display = 'block';
+                const kwHtml = sentence.keywords.map(k => `<span>${k}</span>`).join(' ');
+                els.keywordWords.innerHTML = kwHtml;
+                els.userInput.placeholder = 'Type the full Korean sentence...';
+            } else {
+                els.modeLabel.textContent = '🔗 Conjugation Matrix';
+                els.keywordHint.style.display = 'none';
+                // In conjugation mode, show a hint about the grammar point
+                els.userInput.placeholder = `Use ${grammar.label} grammar...`;
+            }
+
+            // Clear input & feedback
+            els.userInput.value = '';
+            els.userInput.className = '';
+            els.feedback.className = 'feedback';
+            els.feedback.style.display = 'none';
+            els.userInput.focus();
+
+            // Update stats
+            updateStats();
+        }
+
+        function updateStats() {
+            els.totalCount.textContent = state.totalAttempts;
+            els.correctCount.textContent = state.correctAttempts;
+            els.wrongCount.textContent = state.wrongAttempts;
+            els.streakCount.textContent = state.streak;
+            els.mistakeCount.textContent = state.mistakes.length;
+            renderMistakes();
+        }
+
+        function renderMistakes() {
+            if (state.mistakes.length === 0) {
+                els.mistakesList.innerHTML = '<p style="color:var(--text-light); font-size:0.9rem;">No mistakes yet. Keep going! 💪</p>';
+                return;
+            }
+            let html = '';
+            state.mistakes.slice().reverse().forEach((m, i) => {
+                html += `
+                            <div class="mistake-item">
+                                <span>
+                                    <span class="grammar-label">${m.grammar}</span>
+                                    "${m.en}" → 
+                                    <span class="wrong-answer">${m.userAnswer}</span>
+                                    → <span class="correct-answer">${m.correctAnswer}</span>
+                                </span>
+                                <span style="font-size:0.7rem; color:var(--text-light);">#${state.mistakes.length - i}</span>
+                            </div>
+                        `;
+            });
+            els.mistakesList.innerHTML = html;
+        }
+
+        // ============================================================
+        // SUBMIT LOGIC
+        // ============================================================
+        function handleSubmit() {
+            const userAnswer = els.userInput.value.trim();
+            if (!userAnswer) {
+                els.userInput.focus();
+                return;
+            }
+
+            const sentence = getCurrentSentence();
+            const grammar = SENTENCE_DATA[state.currentGrammar];
+            const correctAnswer = sentence.ko;
+
+            // Normalize comparison: remove spaces, compare
+            const normalize = (s) => s.replace(/\s+/g, '').replace(/[.,!?]/g, '');
+            const isCorrect = normalize(userAnswer) === normalize(correctAnswer);
+
+            state.totalAttempts++;
+
+            // Show feedback
+            els.feedback.style.display = 'block';
+            els.feedback.className = 'feedback show';
+
+            if (isCorrect) {
+                state.correctAttempts++;
+                state.streak++;
+                els.feedback.classList.add('correct');
+                els.userInput.className = 'correct';
+                els.answerReveal.innerHTML = `✅ Correct!<br>${colorizeKorean(correctAnswer)}`;
+                els.explanation.textContent = grammar.description;
+            } else {
+                state.wrongAttempts++;
+                state.streak = 0;
+                els.feedback.classList.add('wrong');
+                els.userInput.className = 'wrong';
+
+                // Log mistake
+                state.mistakes.push({
+                    en: sentence.en,
+                    userAnswer: userAnswer,
+                    correctAnswer: correctAnswer,
+                    grammar: grammar.label,
+                });
+
+                els.answerReveal.innerHTML = `
+                            ❌ Correct answer:<br>
+                            ${colorizeKorean(correctAnswer)}
+                            <br><br>
+                            <span style="font-size:0.9rem; color:var(--text-light);">
+                                Your answer: <span style="color:var(--accent);">${userAnswer}</span>
+                            </span>
+                        `;
+                els.explanation.textContent = `💡 ${grammar.description}`;
+            }
+
+            updateStats();
+
+            // Move to next question after delay if correct, or let user click next
+            if (isCorrect) {
+                setTimeout(() => {
+                    advanceQuestion();
+                }, 1200);
+            }
+        }
+
+        function advanceQuestion() {
+            const sentences = getSentences();
+            state.currentSentenceIndex = (state.currentSentenceIndex + 1) % sentences.length;
+            // Or random: state.currentSentenceIndex = getNextSentenceIndex();
+            // Using sequential for now, but with shuffle on load
+            renderQuestion();
+        }
+
+        // ============================================================
+        // GRAMMAR SWITCH
+        // ============================================================
+        function switchGrammar(grammarKey) {
+            state.currentGrammar = grammarKey;
+            state.usedIndices = [];
+            state.currentSentenceIndex = 0;
+
+            // Update buttons
+            document.querySelectorAll('.grammar-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.grammar === grammarKey);
+            });
+
+            renderQuestion();
+        }
+
+        // ============================================================
+        // MODE SWITCH
+        // ============================================================
+        function switchMode(mode) {
+            state.currentMode = mode;
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.mode === mode);
+            });
+            renderQuestion();
+        }
+
+        // ============================================================
+        // LOAD FROM localStorage
+        // ============================================================
+        function loadState() {
+            try {
+                const saved = localStorage.getItem('palteca_state');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    state.totalAttempts = parsed.totalAttempts || 0;
+                    state.correctAttempts = parsed.correctAttempts || 0;
+                    state.wrongAttempts = parsed.wrongAttempts || 0;
+                    state.streak = parsed.streak || 0;
+                    state.mistakes = parsed.mistakes || [];
+                }
+            } catch (e) { /* ignore */ }
+        }
+
+        function saveState() {
+            try {
+                const toSave = {
+                    totalAttempts: state.totalAttempts,
+                    correctAttempts: state.correctAttempts,
+                    wrongAttempts: state.wrongAttempts,
+                    streak: state.streak,
+                    mistakes: state.mistakes,
+                };
+                localStorage.setItem('palteca_state', JSON.stringify(toSave));
+            } catch (e) { /* ignore */ }
+        }
+
+        // Auto-save on changes
+        function autoSave() {
+            saveState();
+        }
+
+        // ============================================================
+        // INIT
+        // ============================================================
+        function init() {
+            loadState();
+
+            // Set up event listeners
+            els.submitBtn.addEventListener('click', () => {
+                handleSubmit();
+                autoSave();
+            });
+
+            els.userInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleSubmit();
+                    autoSave();
+                }
+            });
+
+            els.nextBtn.addEventListener('click', () => {
+                advanceQuestion();
+                autoSave();
+            });
+
+            // Grammar buttons
+            document.querySelectorAll('.grammar-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    switchGrammar(btn.dataset.grammar);
+                    autoSave();
+                });
+            });
+
+            // Mode buttons
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    switchMode(btn.dataset.mode);
+                    autoSave();
+                });
+            });
+
+            // Clear mistakes
+            els.clearMistakes.addEventListener('click', () => {
+                if (confirm('Clear all mistakes?')) {
+                    state.mistakes = [];
+                    updateStats();
+                    autoSave();
+                }
+            });
+
+            // Shuffle sentences on load
+            const sentences = getSentences();
+            state.currentSentenceIndex = 0;
+            state.usedIndices = [];
+
+            renderQuestion();
+            updateStats();
+        }
+
+        // Run
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
