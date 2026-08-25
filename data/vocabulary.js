@@ -57,7 +57,7 @@ export const vocabularyData = {
         {
             id: 'v_t4_002',
             korean: '환경',
-            reading: 'hwan'gyeong',
+            reading: 'hwangyeong',
             meaning_en: 'environment',
             part_of_speech: 'Noun',
             collocations: ['환경 보호', '환경 오염']
