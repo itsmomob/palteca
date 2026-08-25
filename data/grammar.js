@@ -23,10 +23,6 @@ export const grammarData = {
         }
     ],
 
-    TOPIK1: [
-    // Existing entries...
-    
-    // High-frequency beginner grammar
     {
         id: 'g_t1_004',
         korean: '-ㄴ/은 적이 있다',
@@ -130,12 +126,7 @@ export const grammarData = {
             meaning_en: 'whereas / on the other hand',
             category: 'Contrast',
             examples: ['도시는 복잡한 반면에 시골은 조용해요.', '한국어는 재미있는 반면에 어려워요.']
-        }
-    ],
-    TOPIK4: [
-    // Existing entries...
-    
-    // High-frequency TOPIK II grammar (with frequency %)
+        },
     {
         id: 'g_t4_003',
         korean: '-는 대신에',
