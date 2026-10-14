@@ -1,4 +1,4 @@
-export const levels = {
+window.levelData = {
     TOPIK1: {
         id: 'TOPIK1',
         name: 'TOPIK 1',
