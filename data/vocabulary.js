@@ -1,4 +1,4 @@
-export const vocabularyData = {
+window.vocabularyData = {
     // ========== TOPIK 1 - Basic Vocabulary ==========
     TOPIK1: [
         {
