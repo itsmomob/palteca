@@ -1,4 +1,4 @@
-export const exerciseData = {
+window.exerciseData = {
     // ========== TOPIK 1 - Beginner Exercises ==========
     TOPIK1: [
         {
