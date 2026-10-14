@@ -1,4 +1,4 @@
-export const textData = {
+window.textsData = {
     TOPIK1: [
         {
             id: 't_t1_001',
