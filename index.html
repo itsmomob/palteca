@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <header class="app-bar" id="appBar">
@@ -26,43 +26,39 @@
 
   <nav class="tab-bar" id="tabBar">
     <a href="#/" data-nav="home" class="tab-bar__item">
-      <span class="tab-bar__icon">🏠</span>
-      <span class="tab-bar__label">홈</span>
+      <span class="tab-bar__icon">🏠</span><span class="tab-bar__label">홈</span>
     </a>
     <a href="#/study" data-nav="study" class="tab-bar__item">
-      <span class="tab-bar__icon">📚</span>
-      <span class="tab-bar__label">학습</span>
+      <span class="tab-bar__icon">📚</span><span class="tab-bar__label">학습</span>
     </a>
     <a href="#/practice" data-nav="practice" class="tab-bar__item">
-      <span class="tab-bar__icon">🎯</span>
-      <span class="tab-bar__label">연습</span>
+      <span class="tab-bar__icon">🎯</span><span class="tab-bar__label">연습</span>
     </a>
     <a href="#/more" data-nav="more" class="tab-bar__item">
-      <span class="tab-bar__icon">⋯</span>
-      <span class="tab-bar__label">더보기</span>
+      <span class="tab-bar__icon">⋯</span><span class="tab-bar__label">더보기</span>
     </a>
   </nav>
 
-  <!-- Registry -->
+  <!-- ===== 1. Registry (must be first) ===== -->
   <script src="data/registry.js"></script>
 
-  <!-- Topics (consolidated) -->
-  <script src="data/topics/all-topics.js"></script>
+  <!-- ===== 2. Your existing Palteca data ===== -->
+  <script src="data/vocabulary.js"></script>
+  <script src="data/grammar.js"></script>
+  <script src="data/sentences.js"></script>
+  <script src="data/exercises.js"></script>
+  <script src="data/texts.js"></script>
+  <script src="data/levels.js"></script>
 
-  <!-- Grammar (consolidated) -->
-  <script src="data/grammar/all-grammar.js"></script>
+  <!-- ===== 3. Adapter: bridges old data → new app ===== -->
+  <script src="data/adapter.js"></script>
 
-  <!-- TOPIK vocabulary -->
-  <script src="data/topik/topik-1.js"></script>
-
-  <!-- Exercise engine -->
+  <!-- ===== 4. Exercise engines ===== -->
   <script src="exercise.js"></script>
   <script src="crossword.js"></script>
-
-  <!-- Crossword language mode -->
   <script>window.CROSSWORD_LANG = "ko";</script>
 
-  <!-- App -->
+  <!-- ===== 5. App ===== -->
   <script src="app.js"></script>
 
   <script>
