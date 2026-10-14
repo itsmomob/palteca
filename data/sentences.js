@@ -1,4 +1,4 @@
-export const sentenceData = {
+window.sentenceData = {
     TOPIK1: [
         '저는 한국어를 공부해요.',
         '오늘 날씨가 좋아요.',
