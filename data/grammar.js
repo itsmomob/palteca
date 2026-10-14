@@ -1,4 +1,4 @@
-export const grammarData = {
+window.grammarData = {
     // ========== TOPIK 1 - Beginner Grammar ==========
     TOPIK1: [
         {
